@@ -1,9 +1,53 @@
 # 📚 ReadingHub – A Personal Digital Library Manager
 
+A full-stack web application for managing your personal reading list with complete CRUD operations, advanced search, filtering, sorting, and pagination. Built with React, Node.js, Prisma ORM, and Neon PostgreSQL database.
+
 ## 🔗 Live Demo
 
 **Frontend:** [https://capstone-sem3-j7sk.vercel.app/](https://capstone-sem3-j7sk.vercel.app/)
 **Backend:** [https://capstone-sem3-3v88.onrender.com/](https://capstone-sem3-3v88.onrender.com/)
+
+## ✨ Features
+
+### 📖 Book Management (CRUD Operations)
+- **Create**: Add new books with title, author, genre, pages, and reading status
+- **Read**: View all books with detailed information and reading progress
+- **Update**: Edit book details, update reading progress, add notes and reviews
+- **Delete**: Remove books from your library
+
+### 🔍 Advanced Search & Filtering
+- **Search**: Find books by title or author (case-insensitive)
+- **Filter by Status**: To Read, Currently Reading, Completed
+- **Filter by Genre**: Search within specific genres
+- **Combined Filters**: Use multiple filters simultaneously
+
+### 📊 Sorting Options
+- Sort by Date Added (newest/oldest first)
+- Sort by Title (A-Z or Z-A)
+- Sort by Author (alphabetical)
+- Sort by Date Finished
+
+### 📄 Pagination
+- Navigate through large book collections
+- Configurable items per page
+- Page navigation with Previous/Next buttons
+
+### 📈 Reading Statistics
+- Total books in library
+- Books completed
+- Books currently reading
+- Books to read
+
+### 📝 Personal Notes & Reviews
+- Add personal notes for each book
+- Write detailed reviews
+- Rate books with 1-5 star system
+- Track reading progress with page counters
+
+### 🔐 Authentication
+- User registration and login
+- JWT-based authentication
+- Protected routes and API endpoints
 
 ---
 
@@ -166,6 +210,7 @@ npm run dev
 * Social sharing & friend libraries
 * Mobile responsiveness improvements
 * Dark/light mode
+<<<<<<< HEAD
 
 ---
 
@@ -181,3 +226,22 @@ Stack: MERN (MongoDB, Express.js, React.js, Node.js)
 Open for educational and personal use.
 
 ---
+=======
+
+---
+
+## 🙌 Credits
+
+Developed by **Prince Singh**
+Stack: MERN (MongoDB, Express.js, React.js, Node.js)
+
+---
+
+## 📄 License
+
+Open for educational and personal use.
+
+---
+
+
+>>>>>>> b40f1fd (update project)

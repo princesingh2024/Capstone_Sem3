@@ -8,10 +8,196 @@ datasource db {
 }
 
 model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  password        String
+  name            String?
+  avatar          String?
+  bio             String?
+  location        String?
+  website         String?
+  readingGoal     Int?            @default(12) // Books per year
+  isPublic        Boolean         @default(false)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  books           Book[]
+  collections     Collection[]
+  readingSessions ReadingSession[]
+  bookmarks       Bookmark[]
+  reviews         Review[]
+  followers       Follow[]        @relation("UserFollowers")
+  following       Follow[]        @relation("UserFollowing")
+}
+
+model Book {
+  id              String           @id @default(cuid())
+  title           String
+  author          String
+  isbn            String?
+  publisher       String?
+  publishedYear   Int?
+  language        String?          @default("English")
+  genre           String[]
+  tags            String[]
+  description     String?
+  coverImage      String?
+  status          ReadStatus       @default(TO_READ)
+  priority        Priority         @default(MEDIUM)
+  pages           Int?
+  currentPage     Int              @default(0)
+  format          BookFormat       @default(PHYSICAL)
+  purchasePrice   Float?
+  purchaseDate    DateTime?
+  location        String?          // Where the book is stored
+  condition       BookCondition?
+  dateAdded       DateTime         @default(now())
+  dateStarted     DateTime?
+  dateFinished    DateTime?
+  estimatedFinish DateTime?
+  userId          String
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readingSessions ReadingSession[]
+  bookmarks       Bookmark[]
+  reviews         Review[]
+  collections     BookCollection[]
+  quotes          Quote[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([userId, status])
+  @@index([userId, genre])
+  @@index([title, author])
+}
+
+model Collection {
+  id          String           @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean          @default(false)
+  color       String?          @default("#6366f1")
+  userId      String
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  books       BookCollection[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@unique([userId, name])
+}
+
+model BookCollection {
+  id           String     @id @default(cuid())
+  bookId       String
+  collectionId String
+  addedAt      DateTime   @default(now())
+  book         Book       @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, collectionId])
+}
+
+model ReadingSession {
   id        String   @id @default(cuid())
-  email     String   @unique
-  password  String
-  name      String?
+  bookId    String
+  userId    String
+  startPage Int
+  endPage   Int
+  duration  Int      // in minutes
+  notes     String?
+  mood      String?  // happy, focused, tired, etc.
+  location  String?  // home, cafe, library, etc.
+  date      DateTime @default(now())
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, date])
+  @@index([bookId, date])
+}
+
+model Bookmark {
+  id       String   @id @default(cuid())
+  bookId   String
+  userId   String
+  page     Int
+  chapter  String?
+  note     String?
+  isPublic Boolean  @default(false)
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([bookId, userId, page])
+}
+
+model Quote {
+  id       String   @id @default(cuid())
+  bookId   String
+  text     String
+  page     Int?
+  chapter  String?
+  tags     String[]
+  isPublic Boolean  @default(false)
+  book     Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([bookId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  bookId    String
+  userId    String
+  rating    Int      // 1-5 stars
+  title     String?
+  content   String
+  isPublic  Boolean  @default(false)
+  likes     Int      @default(0)
+  book      Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([bookId, userId])
+  @@index([userId, createdAt])
+}
+
+model Follow {
+  id          String   @id @default(cuid())
+  followerId  String
+  followingId String
+  follower    User     @relation("UserFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+}
+
+enum ReadStatus {
+  TO_READ
+  IN_PROGRESS
+  COMPLETED
+  DNF // Did Not Finish
+  ON_HOLD
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum BookFormat {
+  PHYSICAL
+  EBOOK
+  AUDIOBOOK
+  PDF
+}
+
+enum BookCondition {
+  NEW
+  LIKE_NEW
+  GOOD
+  FAIR
+  POOR
 }
