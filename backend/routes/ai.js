@@ -205,7 +205,7 @@ router.get('/summary/:bookId', authenticateToken, async (req, res) => {
   }
 });
 
-// Get reading goals suggestions
+
 router.get('/goals', authenticateToken, async (req, res) => {
   try {
     console.log('Generating reading goals for user:', req.userId);
