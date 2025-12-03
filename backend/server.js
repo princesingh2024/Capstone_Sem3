@@ -16,24 +16,55 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// CORS configuration
+// CORS configuration - more permissive for debugging
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://capstone-sem3-j7sk.vercel.app',
-    'https://capstone-frontend.onrender.com'
-  ],
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://capstone-sem3-j7sk.vercel.app',
+      'https://capstone-frontend.onrender.com'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // For debugging - log the origin that's being blocked
+    console.log('CORS blocked origin:', origin);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'],
+  maxAge: 86400 // 24 hours
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
-app.use(express.json());
 
-// Handle preflight requests
-app.options('*', cors(corsOptions));
+// Parse JSON bodies
+app.use(express.json({ limit: '10mb' }));
+
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+  next();
+});
+
+// Handle preflight requests explicitly
+app.options('*', (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  res.sendStatus(200);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -47,12 +78,19 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'ReadingHub API is running' });
 });
 
-app.listen(PORT, async () => {
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Start server
+const server = app.listen(PORT, async () => {
   console.log(`🚀 ReadingHub Server running on port ${PORT}`);
   console.log(`📚 API Health: http://localhost:${PORT}/health`);
-  console.log(`🌐 CORS enabled for origins:`, corsOptions.origin);
   console.log(`🔑 JWT_SECRET configured:`, !!process.env.JWT_SECRET);
   console.log(`🗄️ DATABASE_URL configured:`, !!process.env.DATABASE_URL);
+  console.log(`🌍 NODE_ENV:`, process.env.NODE_ENV);
   
   // Test database connection
   try {
@@ -60,5 +98,22 @@ app.listen(PORT, async () => {
     console.log('✅ Database connected successfully');
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
+    process.exit(1);
   }
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  console.error('Server error:', error);
+  process.exit(1);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received, shutting down gracefully');
+  await prisma.$disconnect();
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
 });

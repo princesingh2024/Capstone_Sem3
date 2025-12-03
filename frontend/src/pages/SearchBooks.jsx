@@ -33,27 +33,6 @@ function SearchBooks() {
 
       console.log('Sending book data:', cleanBookData);
 
-      // Test authentication first
-      const authTestResponse = await fetch(`${API_URL}/api/books/test-auth`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      if (!authTestResponse.ok) {
-        const authError = await authTestResponse.json();
-        console.error('Auth test failed:', authError);
-        alert(`Authentication failed: ${authError.error}`);
-        if (authTestResponse.status === 401 || authTestResponse.status === 403) {
-          localStorage.removeItem('token');
-          navigate('/login');
-        }
-        return;
-      }
-
-      const authData = await authTestResponse.json();
-      console.log('Auth test successful:', authData);
-
       const response = await fetch(`${API_URL}/api/books`, {
         method: 'POST',
         headers: {
