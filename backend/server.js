@@ -27,10 +27,27 @@ const corsOptions = {
       'http://localhost:3000',
       'http://localhost:5173',
       'https://capstone-sem3-j7sk.vercel.app',
+      'https://capstone-sem3-five.vercel.app',
       'https://capstone-frontend.onrender.com'
     ];
     
+    // Check exact matches first
     if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow any Vercel deployment URL for this project
+    if (origin && (
+      (origin.includes('capstone-sem3') && origin.includes('vercel.app')) ||
+      (origin.includes('capstone-frontend') && origin.includes('onrender.com'))
+    )) {
+      console.log('CORS allowed for deployment:', origin);
+      return callback(null, true);
+    }
+    
+    // In production, be more permissive for HTTPS origins (temporary for debugging)
+    if (process.env.NODE_ENV === 'production' && origin && origin.startsWith('https://')) {
+      console.log('CORS allowed for HTTPS origin in production:', origin);
       return callback(null, true);
     }
     
