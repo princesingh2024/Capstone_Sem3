@@ -2,15 +2,39 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 class GeminiService {
   constructor() {
+    this.genAI = null;
+    this.model = null;
+    this.initialized = false;
+  }
+
+  initialize() {
+    if (this.initialized) return;
+    
     if (!process.env.GEMINI_API_KEY) {
+      console.error('GEMINI_API_KEY environment variable is not set');
       throw new Error('GEMINI_API_KEY environment variable is required');
     }
     
-    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+    try {
+      this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+      this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+      this.initialized = true;
+      console.log('✅ Gemini AI service initialized successfully');
+    } catch (error) {
+      console.error('❌ Failed to initialize Gemini AI service:', error.message);
+      throw error;
+    }
+  }
+
+  ensureInitialized() {
+    if (!this.initialized) {
+      this.initialize();
+    }
   }
 
   async generateBookRecommendations(userBooks, preferences = {}) {
+    this.ensureInitialized();
+    
     try {
       const { genres = [], authors = [], readingGoals = '' } = preferences;
       
@@ -63,6 +87,8 @@ Focus on books that match their reading patterns and introduce them to new but r
   }
 
   async generateReadingInsights(userBooks, readingSessions = []) {
+    this.ensureInitialized();
+    
     try {
       const completedBooks = userBooks.filter(book => book.status === 'COMPLETED');
       const inProgressBooks = userBooks.filter(book => book.status === 'IN_PROGRESS');
@@ -113,6 +139,8 @@ Be encouraging and provide actionable insights based on their reading data.
   }
 
   async generateBookSummary(bookTitle, bookAuthor, userNotes = '') {
+    this.ensureInitialized();
+    
     try {
       const prompt = `
 Create a helpful summary for the book "${bookTitle}" by ${bookAuthor}.
@@ -150,6 +178,8 @@ Keep it concise and helpful for someone who has read or is reading the book.
   }
 
   async generateReadingGoals(userBooks, currentGoal = null) {
+    this.ensureInitialized();
+    
     try {
       const completedThisYear = userBooks.filter(book => 
         book.status === 'COMPLETED' && 

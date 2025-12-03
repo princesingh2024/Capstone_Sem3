@@ -30,6 +30,28 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
+// Test AI service endpoint
+router.get('/test', authenticateToken, async (req, res) => {
+  try {
+    console.log('Testing AI service...');
+    
+    // Test if Gemini service can be initialized
+    geminiService.ensureInitialized();
+    
+    res.json({
+      status: 'OK',
+      message: 'AI service is working',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('AI service test failed:', error);
+    res.status(500).json({
+      error: 'AI service test failed',
+      message: error.message
+    });
+  }
+});
+
 // Get AI-powered book recommendations
 router.get('/recommendations', authenticateToken, async (req, res) => {
   try {
@@ -60,9 +82,30 @@ router.get('/recommendations', authenticateToken, async (req, res) => {
       authors: [...new Set(userBooks.map(book => book.author))].slice(0, 5)
     };
 
-    const recommendations = await geminiService.generateBookRecommendations(userBooks, preferences);
-    
-    res.json(recommendations);
+    console.log('User books:', userBooks.length);
+    console.log('Preferences:', preferences);
+
+    try {
+      const recommendations = await geminiService.generateBookRecommendations(userBooks, preferences);
+      res.json(recommendations);
+    } catch (aiError) {
+      console.error('AI service error:', aiError.message);
+      
+      // Return fallback recommendations
+      res.json({
+        recommendations: [
+          {
+            title: "The Seven Husbands of Evelyn Hugo",
+            author: "Taylor Jenkins Reid",
+            genre: ["Fiction", "Romance"],
+            reason: "Based on your reading preferences, this engaging novel offers compelling characters and storytelling.",
+            description: "A reclusive Hollywood icon finally tells her story to a young journalist."
+          }
+        ],
+        message: 'AI recommendations temporarily unavailable. Here are some popular suggestions.',
+        fallback: true
+      });
+    }
   } catch (error) {
     console.error('Error getting AI recommendations:', error);
     res.status(500).json({ 
@@ -101,9 +144,24 @@ router.get('/insights', authenticateToken, async (req, res) => {
       });
     }
 
-    const insights = await geminiService.generateReadingInsights(userBooks, readingSessions);
-    
-    res.json(insights);
+    try {
+      const insights = await geminiService.generateReadingInsights(userBooks, readingSessions);
+      res.json(insights);
+    } catch (aiError) {
+      console.error('AI insights error:', aiError.message);
+      
+      // Return fallback insights
+      res.json({
+        insights: {
+          readingPatterns: 'You have a growing library with diverse interests. Keep exploring different genres!',
+          favoriteGenres: [...new Set(userBooks.flatMap(book => book.genre || []))].slice(0, 3),
+          readingStrengths: 'You\'re building a great reading habit by tracking your books.',
+          suggestions: 'Try setting a monthly reading goal and explore new authors in your favorite genres.',
+          yearProgress: `You have ${userBooks.filter(b => b.status === 'COMPLETED').length} completed books. Keep up the great work!`
+        },
+        fallback: true
+      });
+    }
   } catch (error) {
     console.error('Error getting reading insights:', error);
     res.status(500).json({ 
@@ -220,6 +278,7 @@ router.post('/chat', authenticateToken, async (req, res) => {
 
 Please provide a helpful, friendly response about books and reading. Keep it conversational and engaging.`;
 
+    geminiService.ensureInitialized();
     const result = await geminiService.model.generateContent(prompt);
     const response = await result.response;
     const aiResponse = response.text();
