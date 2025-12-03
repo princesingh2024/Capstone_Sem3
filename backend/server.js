@@ -16,55 +16,17 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Simple and robust CORS configuration for production
+// Ultra-permissive CORS for production deployment issues
+// This will allow all origins in production to fix deployment issues
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin) return callback(null, true);
-    
-    // List of allowed origins
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://capstone-sem3-j7sk.vercel.app',
-      'https://capstone-sem3-five.vercel.app',
-      'https://capstone-frontend.onrender.com'
-    ];
-    
-    // Check if origin is in allowed list
-    if (allowedOrigins.includes(origin)) {
-      console.log('✅ CORS allowed for:', origin);
-      return callback(null, true);
-    }
-    
-    // Allow any capstone-sem3 Vercel deployment
-    if (origin.includes('capstone-sem3') && origin.includes('vercel.app')) {
-      console.log('✅ CORS allowed for Vercel deployment:', origin);
-      return callback(null, true);
-    }
-    
-    // Allow any capstone-frontend Render deployment
-    if (origin.includes('capstone-frontend') && origin.includes('onrender.com')) {
-      console.log('✅ CORS allowed for Render deployment:', origin);
-      return callback(null, true);
-    }
-    
-    // In production, be more permissive for HTTPS origins (temporary)
-    if (process.env.NODE_ENV === 'production' && origin.startsWith('https://')) {
-      console.log('⚠️ CORS allowed for production HTTPS:', origin);
-      return callback(null, true);
-    }
-    
-    console.log('❌ CORS blocked origin:', origin);
-    callback(new Error('Not allowed by CORS'));
-  },
+  origin: true, // Allow all origins in production
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   maxAge: 86400
 };
 
-// IMPORTANT: apply cors middleware BEFORE routes so it runs for preflight too
+// Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Parse JSON bodies
@@ -76,26 +38,11 @@ app.use((req, res, next) => {
   next();
 });
 
-// Additional CORS headers middleware for production reliability
+// Force CORS headers on ALL responses
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   
-  // Always set CORS headers for production
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  
-  next();
-});
-
-// Explicitly handle OPTIONS preflight requests
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  
-  // Set CORS headers explicitly for preflight
+  // Set CORS headers aggressively
   if (origin) {
     res.header('Access-Control-Allow-Origin', origin);
   } else {
@@ -107,8 +54,24 @@ app.options('*', (req, res) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Max-Age', '86400');
   
-  console.log(`✅ Preflight handled for origin: ${origin || 'none'}`);
-  res.sendStatus(204);
+  console.log(`🔧 CORS headers set for ${req.method} ${req.path} from origin: ${origin || 'none'}`);
+  
+  next();
+});
+
+// Handle ALL OPTIONS requests aggressively
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  
+  // Always allow the requesting origin
+  res.header('Access-Control-Allow-Origin', origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  console.log(`✅ OPTIONS preflight handled for: ${origin || 'no-origin'}`);
+  res.status(204).end();
 });
 
 // Routes
@@ -121,7 +84,23 @@ app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'ReadingHub API is running' });
+  res.json({ 
+    status: 'OK', 
+    message: 'ReadingHub API is running',
+    cors: 'enabled',
+    origin: req.headers.origin || 'none',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// CORS test endpoint
+app.get('/cors-test', (req, res) => {
+  res.json({
+    message: 'CORS is working!',
+    origin: req.headers.origin || 'none',
+    method: req.method,
+    timestamp: new Date().toISOString()
+  });
 });
 
 // Error handler (CORS errors may surface here)
