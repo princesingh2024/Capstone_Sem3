@@ -1,7 +1,7 @@
 {
   "build": {
     "env": {
-      "VITE_API_URL": "https://capstone-backend.onrender.com"
+      "VITE_API_URL": "https://capstone-project-sh69.onrender.com"
     }
   },
   "rewrites": [
