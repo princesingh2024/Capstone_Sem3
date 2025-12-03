@@ -83,6 +83,40 @@ function Library() {
     }
   };
 
+  const handleStatusChange = async (bookId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/books/${bookId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (response.ok) {
+        // Update the book in the local state immediately for better UX
+        setBooks(prevBooks => 
+          prevBooks.map(book => 
+            book.id === bookId 
+              ? { ...book, status: newStatus }
+              : book
+          )
+        );
+        // Refresh data to get accurate stats and any server-side updates
+        fetchBooks();
+        fetchStats();
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update book status');
+      }
+    } catch (error) {
+      console.error('Error updating book status:', error);
+      alert('Failed to update book status. Please try again.');
+    }
+  };
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'COMPLETED': return 'bg-green-100 text-green-800';
@@ -103,64 +137,61 @@ function Library() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-2xl text-gray-600">Loading your library...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">My Library</h1>
-            <Link
-              to="/add-book"
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-2.5 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
-            >
-              Add Book
-            </Link>
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Stats Cards */}
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-4xl font-bold" style={{ color: '#1a535c' }}>My Library</h1>
+          <Link
+            to="/add-book"
+            className="text-white font-medium px-6 py-2.5 rounded-lg hover:opacity-90 transition duration-200"
+            style={{ backgroundColor: '#1a535c' }}
+          >
+            Add Book
+          </Link>
+        </div>
+
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="text-3xl font-bold text-gray-900">{stats.totalBooks || 0}</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#1a535c' }}>{stats.totalBooks || 0}</div>
             <div className="text-gray-600">Total Books</div>
           </div>
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="text-3xl font-bold text-green-600">{stats.completedBooks || 0}</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#1a535c' }}>{stats.completedBooks || 0}</div>
             <div className="text-gray-600">Completed</div>
           </div>
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="text-3xl font-bold text-blue-600">{stats.inProgressBooks || 0}</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#1a535c' }}>{stats.inProgressBooks || 0}</div>
             <div className="text-gray-600">Reading</div>
           </div>
-          <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
-            <div className="text-3xl font-bold text-gray-600">{stats.toReadBooks || 0}</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold" style={{ color: '#1a535c' }}>{stats.toReadBooks || 0}</div>
             <div className="text-gray-600">To Read</div>
           </div>
         </div>
 
         {/* Filters and Search */}
-        <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-8">
+        <div className="mb-8">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             <input
               type="text"
               placeholder="Search books..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
             />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
             >
               <option value="">All Status</option>
               <option value="TO_READ">To Read</option>
@@ -172,12 +203,12 @@ function Library() {
               placeholder="Filter by genre..."
               value={genreFilter}
               onChange={(e) => setGenreFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
             />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
             >
               <option value="dateAdded">Date Added</option>
               <option value="title">Title</option>
@@ -187,7 +218,7 @@ function Library() {
             <select
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:border-gray-400"
             >
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
@@ -197,13 +228,13 @@ function Library() {
 
         {/* Books Grid */}
         {books.length === 0 ? (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📚</div>
+          <div className="text-center py-16">
             <h3 className="text-2xl font-bold text-gray-900 mb-2">No books found</h3>
             <p className="text-gray-600 mb-6">Start building your digital library!</p>
             <Link
               to="/add-book"
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+              className="text-white font-medium px-6 py-3 rounded-lg hover:opacity-90 transition duration-200"
+              style={{ backgroundColor: '#1a535c' }}
             >
               Add Your First Book
             </Link>
@@ -212,15 +243,23 @@ function Library() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {books.map((book) => (
-                <div key={book.id} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition">
+                <div key={book.id} className="bg-white rounded-lg p-6 border border-gray-100 hover:border-gray-200 transition">
                   <div className="flex justify-between items-start mb-4">
                     <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(book.status)}`}>
                       {getStatusText(book.status)}
                     </span>
                     <div className="flex space-x-2">
                       <Link
+                        to={`/book/${book.id}`}
+                        className="hover:opacity-70 font-medium"
+                        style={{ color: '#1a535c' }}
+                      >
+                        View
+                      </Link>
+                      <Link
                         to={`/edit-book/${book.id}`}
-                        className="text-indigo-600 hover:text-indigo-700 font-medium"
+                        className="hover:opacity-70 font-medium"
+                        style={{ color: '#1a535c' }}
                       >
                         Edit
                       </Link>
@@ -235,7 +274,20 @@ function Library() {
                   
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{book.title}</h3>
                   <p className="text-gray-600 mb-2">by {book.author}</p>
-                  {book.genre && <p className="text-sm text-gray-500 mb-3">{book.genre}</p>}
+                  {book.genre && book.genre.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {book.genre.slice(0, 2).map((genre, index) => (
+                        <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md">
+                          {genre}
+                        </span>
+                      ))}
+                      {book.genre.length > 2 && (
+                        <span className="px-2 py-1 bg-gray-50 text-gray-600 text-xs rounded-md">
+                          +{book.genre.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
                   
                   {book.pages && (
                     <div className="mb-3">
@@ -245,26 +297,44 @@ function Library() {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full"
-                          style={{ width: `${(book.currentPage / book.pages) * 100}%` }}
+                          className="h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${(book.currentPage / book.pages) * 100}%`, backgroundColor: '#1a535c' }}
                         ></div>
                       </div>
                     </div>
                   )}
                   
-                  {book.rating && (
-                    <div className="flex items-center mb-2">
-                      {[...Array(5)].map((_, i) => (
-                        <span key={i} className={`text-lg ${i < book.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
-                          ⭐
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                  
                   {book.notes && (
-                    <p className="text-sm text-gray-600 italic">{book.notes.substring(0, 100)}...</p>
+                    <p className="text-sm text-gray-600 italic mb-3">{book.notes.substring(0, 100)}...</p>
                   )}
+
+                  {/* Quick Actions */}
+                  <div className="flex space-x-2 pt-2">
+                    {book.status === 'TO_READ' && (
+                      <button
+                        onClick={() => handleStatusChange(book.id, 'IN_PROGRESS')}
+                        className="flex-1 bg-blue-50 text-blue-700 font-medium py-2 px-3 rounded-lg hover:bg-blue-100 transition text-sm"
+                      >
+                        Start Reading
+                      </button>
+                    )}
+                    {book.status === 'IN_PROGRESS' && (
+                      <button
+                        onClick={() => handleStatusChange(book.id, 'COMPLETED')}
+                        className="flex-1 bg-green-50 text-green-700 font-medium py-2 px-3 rounded-lg hover:bg-green-100 transition text-sm"
+                      >
+                        Mark Complete
+                      </button>
+                    )}
+                    {book.status === 'COMPLETED' && (
+                      <button
+                        onClick={() => handleStatusChange(book.id, 'IN_PROGRESS')}
+                        className="flex-1 bg-blue-50 text-blue-700 font-medium py-2 px-3 rounded-lg hover:bg-blue-100 transition text-sm"
+                      >
+                        Mark Reading
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

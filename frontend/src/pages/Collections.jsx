@@ -99,7 +99,8 @@ function Collections() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+          className="text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl"
+          style={{ backgroundColor: '#1a535c' }}
         >
           Create Collection
         </button>
@@ -108,12 +109,13 @@ function Collections() {
       {/* Collections Grid */}
       {collections.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">📚</div>
+          <div className="text-6xl mb-4"></div>
           <h3 className="text-2xl font-bold text-gray-900 mb-2">No collections yet</h3>
           <p className="text-gray-600 mb-6">Create your first collection to organize your books</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+            className="text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl"
+            style={{ backgroundColor: '#1a535c' }}
           >
             Create Collection
           </button>
@@ -130,7 +132,6 @@ function Collections() {
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-2xl"
                   style={{ backgroundColor: collection.color }}
                 >
-                  📚
                 </div>
                 <div className="flex items-center space-x-2">
                   {collection.isPublic && (
@@ -237,7 +238,8 @@ function Collections() {
               <div className="flex space-x-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200"
+                  className="flex-1 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition duration-200"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Create Collection
                 </button>

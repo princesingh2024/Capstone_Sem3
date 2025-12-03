@@ -68,10 +68,10 @@ function BookDetails() {
 
   const getFormatIcon = (format) => {
     switch (format) {
-      case 'EBOOK': return '📱';
-      case 'AUDIOBOOK': return '🎧';
-      case 'PDF': return '📄';
-      default: return '📖';
+      case 'EBOOK': return '';
+      case 'AUDIOBOOK': return '';
+      case 'PDF': return '';
+      default: return '';
     }
   };
 
@@ -87,7 +87,7 @@ function BookDetails() {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="text-6xl mb-4">📚</div>
+          <div className="text-6xl mb-4"></div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Book not found</h2>
           <Link to="/library" className="text-indigo-600 hover:text-indigo-700">
             Return to Library
@@ -118,7 +118,7 @@ function BookDetails() {
                 <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover rounded-xl" />
               ) : (
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📚</div>
+                  <div className="text-6xl mb-4"></div>
                   <div className="text-gray-600">No Cover</div>
                 </div>
               )}
@@ -136,7 +136,8 @@ function BookDetails() {
               </div>
               <Link
                 to={`/edit-book/${book.id}`}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+                className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                style={{ backgroundColor: '#1a535c' }}
               >
                 Edit Book
               </Link>
@@ -177,7 +178,8 @@ function BookDetails() {
               {book.status === 'TO_READ' && (
                 <button
                   onClick={() => updateStatus('IN_PROGRESS')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                  className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Start Reading
                 </button>
@@ -185,14 +187,15 @@ function BookDetails() {
               {book.status === 'IN_PROGRESS' && (
                 <button
                   onClick={() => updateStatus('COMPLETED')}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                  className="text-white px-4 py-2 rounded-lg hover:opacity-90 transition"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Mark Complete
                 </button>
               )}
               <button
                 onClick={() => updateStatus('ON_HOLD')}
-                className="bg-yellow-600 text-white px-4 py-2 rounded-lg hover:bg-yellow-700 transition"
+                className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition"
               >
                 Put on Hold
               </button>
@@ -265,7 +268,7 @@ function BookDetails() {
                 </div>
               ) : (
                 <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📝</div>
+                  <div className="text-4xl mb-2"></div>
                   <p className="text-gray-600">No notes yet</p>
                   <Link
                     to={`/edit-book/${book.id}`}
@@ -289,7 +292,7 @@ function BookDetails() {
 
           {activeTab === 'sessions' && (
             <div className="text-center py-8">
-              <div className="text-4xl mb-2">📖</div>
+              <div className="text-4xl mb-2"></div>
               <p className="text-gray-600 mb-4">Reading sessions will appear here</p>
               <Link
                 to="/reading-sessions"

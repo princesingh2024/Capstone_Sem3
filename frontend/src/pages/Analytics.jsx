@@ -57,7 +57,8 @@ function Analytics() {
           <select
             value={timeframe}
             onChange={(e) => setTimeframe(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+            style={{ '--tw-ring-color': '#1a535c' }}
           >
             <option value="month">This Month</option>
             <option value="quarter">This Quarter</option>
@@ -76,7 +77,6 @@ function Analytics() {
               <div className="text-gray-600">Books Completed</div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">✅</span>
             </div>
           </div>
           {stats.completionRate && (
@@ -93,7 +93,6 @@ function Analytics() {
               <div className="text-gray-600">Pages Read</div>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📖</span>
             </div>
           </div>
           {stats.avgPagesPerDay && (
@@ -110,7 +109,6 @@ function Analytics() {
               <div className="text-gray-600">Hours Read</div>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">⏰</span>
             </div>
           </div>
           {stats.avgSessionTime && (
@@ -127,7 +125,6 @@ function Analytics() {
               <div className="text-gray-600">Day Streak</div>
             </div>
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">🔥</span>
             </div>
           </div>
           {stats.longestStreak && (
@@ -165,14 +162,17 @@ function Analytics() {
             {genreData.slice(0, 8).map((genre, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-4 h-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600"></div>
+                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#1a535c' }}></div>
                   <span className="text-gray-700 font-medium">{genre.name}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <div className="w-24 bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-gradient-to-r from-indigo-600 to-purple-600 h-2 rounded-full"
-                      style={{ width: `${(genre.count / genreData[0]?.count) * 100}%` }}
+                      className="h-2 rounded-full"
+                      style={{ 
+                        width: `${(genre.count / genreData[0]?.count) * 100}%`,
+                        backgroundColor: '#1a535c'
+                      }}
                     ></div>
                   </div>
                   <span className="text-sm text-gray-600 w-8">{genre.count}</span>
@@ -286,7 +286,7 @@ function Analytics() {
           {stats.recentActivity?.slice(0, 5).map((activity, index) => (
             <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
               <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white">
-                {activity.type === 'completed' ? '✅' : activity.type === 'started' ? '📖' : '📝'}
+                {activity.type === 'completed' ? '✅' : activity.type === 'started' ? '' : '📝'}
               </div>
               <div className="flex-1">
                 <p className="font-medium text-gray-900">{activity.description}</p>

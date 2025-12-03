@@ -38,10 +38,10 @@ function BookCard({ book, onDelete, onStatusChange }) {
 
   const getFormatIcon = (format) => {
     switch (format) {
-      case 'EBOOK': return '📱';
-      case 'AUDIOBOOK': return '🎧';
-      case 'PDF': return '📄';
-      default: return '📖';
+      case 'EBOOK': return '';
+      case 'AUDIOBOOK': return '';
+      case 'PDF': return '';
+      default: return '';
     }
   };
 
@@ -115,7 +115,7 @@ function BookCard({ book, onDelete, onStatusChange }) {
           <img src={book.coverImage} alt={book.title} className="w-full h-full object-cover rounded-xl" />
         ) : (
           <div className="text-center">
-            <div className="text-4xl mb-2">📚</div>
+            <div className="text-4xl mb-2"></div>
             <div className="text-sm text-gray-600">No Cover</div>
           </div>
         )}

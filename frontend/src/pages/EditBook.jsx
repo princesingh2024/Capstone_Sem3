@@ -36,7 +36,7 @@ function EditBook() {
         setFormData({
           title: book.title || '',
           author: book.author || '',
-          genre: book.genre || '',
+          genre: Array.isArray(book.genre) ? book.genre.join(', ') : (book.genre || ''),
           pages: book.pages || '',
           status: book.status || 'TO_READ',
           currentPage: book.currentPage || '',
@@ -61,13 +61,23 @@ function EditBook() {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // Process genre field to convert comma-separated string to array
+      const processedData = {
+        ...formData,
+        genre: formData.genre ? formData.genre.split(',').map(g => g.trim()).filter(g => g) : [],
+        pages: formData.pages ? parseInt(formData.pages) : null,
+        currentPage: formData.currentPage ? parseInt(formData.currentPage) : 0,
+        rating: formData.rating ? parseInt(formData.rating) : null
+      };
+
       const response = await fetch(`${API_URL}/api/books/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(processedData)
       });
 
       if (response.ok) {
@@ -92,18 +102,18 @@ function EditBook() {
 
   if (fetchLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-2xl text-gray-600">Loading book...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <div className="min-h-screen bg-white">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Link to="/library" className="text-indigo-600 hover:text-indigo-700">
+            <Link to="/library" className="hover:opacity-80" style={{ color: '#1a535c' }}>
               ← Back to Library
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">Edit Book</h1>
@@ -114,7 +124,7 @@ function EditBook() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-50 border-l-4 text-red-700 px-4 py-3 rounded mb-6" style={{ borderColor: '#1a535c' }}>
               <p className="text-sm">{error}</p>
             </div>
           )}
@@ -153,14 +163,16 @@ function EditBook() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Genre
+                  Genres (comma-separated)
                 </label>
                 <input
                   type="text"
                   name="genre"
                   value={formData.genre}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900"
+                  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition text-gray-900"
+                  style={{ '--tw-ring-color': '#1a535c' }}
+                  placeholder="e.g., Fiction, Mystery, Science Fiction"
                 />
               </div>
 
@@ -263,7 +275,8 @@ function EditBook() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                className="flex-1 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition duration-200 disabled:opacity-50"
+                style={{ backgroundColor: '#1a535c' }}
               >
                 {loading ? 'Updating Book...' : 'Update Book'}
               </button>

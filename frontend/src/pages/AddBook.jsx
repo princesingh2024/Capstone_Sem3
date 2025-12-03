@@ -58,11 +58,11 @@ function AddBook() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
-      <div className="bg-white/80 backdrop-blur-md border-b border-gray-200">
+    <div className="min-h-screen bg-white">
+      <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center space-x-4">
-            <Link to="/library" className="text-indigo-600 hover:text-indigo-700">
+            <Link to="/library" className="hover:opacity-80" style={{ color: '#1a535c' }}>
               ← Back to Library
             </Link>
             <h1 className="text-3xl font-bold text-gray-900">Add New Book</h1>
@@ -73,7 +73,7 @@ function AddBook() {
       <div className="max-w-2xl mx-auto px-6 py-12">
         <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-50 border-l-4 text-red-700 px-4 py-3 rounded mb-6" style={{ borderColor: '#1a535c' }}>
               <p className="text-sm">{error}</p>
             </div>
           )}
@@ -137,10 +137,10 @@ function AddBook() {
                   onChange={handleChange}
                   className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900"
                 >
-                  <option value="PHYSICAL">📖 Physical Book</option>
-                  <option value="EBOOK">📱 E-book</option>
-                  <option value="AUDIOBOOK">🎧 Audiobook</option>
-                  <option value="PDF">📄 PDF</option>
+                  <option value="PHYSICAL"> Physical Book</option>
+                  <option value="EBOOK"> E-book</option>
+                  <option value="AUDIOBOOK"> Audiobook</option>
+                  <option value="PDF"> PDF</option>
                 </select>
               </div>
 
@@ -273,7 +273,8 @@ function AddBook() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                className="flex-1 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                style={{ backgroundColor: '#1a535c' }}
               >
                 {loading ? 'Adding Book...' : 'Add Book'}
               </button>

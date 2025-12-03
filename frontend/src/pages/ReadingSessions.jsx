@@ -139,14 +139,14 @@ function ReadingSessions() {
       excited: '🤩',
       calm: '😇'
     };
-    return moods[mood] || '📖';
+    return moods[mood] || '';
   };
 
   const getLocationIcon = (location) => {
     const locations = {
       home: '🏠',
       cafe: '☕',
-      library: '📚',
+      library: '',
       park: '🌳',
       commute: '🚊',
       bed: '🛏️'
@@ -172,7 +172,8 @@ function ReadingSessions() {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+          className="text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl"
+          style={{ backgroundColor: '#1a535c' }}
         >
           Log Session
         </button>
@@ -187,7 +188,6 @@ function ReadingSessions() {
               <div className="text-gray-600">Total Sessions</div>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📖</span>
             </div>
           </div>
         </div>
@@ -199,7 +199,6 @@ function ReadingSessions() {
               <div className="text-gray-600">Pages Read</div>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📄</span>
             </div>
           </div>
         </div>
@@ -211,7 +210,6 @@ function ReadingSessions() {
               <div className="text-gray-600">Hours Read</div>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">⏰</span>
             </div>
           </div>
         </div>
@@ -223,7 +221,6 @@ function ReadingSessions() {
               <div className="text-gray-600">Avg Session (min)</div>
             </div>
             <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-              <span className="text-2xl">📊</span>
             </div>
           </div>
         </div>
@@ -232,12 +229,13 @@ function ReadingSessions() {
       {/* Sessions List */}
       {sessions.length === 0 ? (
         <div className="text-center py-16">
-          <div className="text-6xl mb-4">📖</div>
+          <div className="text-6xl mb-4"></div>
           <h3 className="text-2xl font-bold text-gray-900 mb-2">No reading sessions yet</h3>
           <p className="text-gray-600 mb-6">Start logging your reading sessions to track your progress</p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold px-6 py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+            className="text-white font-semibold px-6 py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl"
+            style={{ backgroundColor: '#1a535c' }}
           >
             Log First Session
           </button>
@@ -260,7 +258,7 @@ function ReadingSessions() {
                     </div>
                     
                     <div className="flex items-center space-x-6 text-sm text-gray-600 mb-3">
-                      <span>📄 Pages {session.startPage}-{session.endPage} ({session.endPage - session.startPage} pages)</span>
+                      <span> Pages {session.startPage}-{session.endPage} ({session.endPage - session.startPage} pages)</span>
                       <span>⏰ {session.duration} minutes</span>
                       <span>📅 {new Date(session.date).toLocaleDateString()}</span>
                     </div>
@@ -402,7 +400,7 @@ function ReadingSessions() {
                     <option value="">Select location</option>
                     <option value="home">🏠 Home</option>
                     <option value="cafe">☕ Cafe</option>
-                    <option value="library">📚 Library</option>
+                    <option value="library"> Library</option>
                     <option value="park">🌳 Park</option>
                     <option value="commute">🚊 Commute</option>
                     <option value="bed">🛏️ Bed</option>
@@ -426,7 +424,8 @@ function ReadingSessions() {
               <div className="flex space-x-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200"
+                  className="flex-1 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition duration-200"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Log Session
                 </button>

@@ -34,18 +34,18 @@ function Login({ setToken }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex">
+    <div className="min-h-screen bg-white flex">
       {/* Left Side - Form */}
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl mb-6"></div>
+            <div className="w-12 h-12 rounded-xl mb-6" style={{ backgroundColor: '#1a535c' }}></div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome back</h1>
             <p className="text-gray-600">Enter your credentials to access your account</p>
           </div>
 
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded mb-6">
+            <div className="bg-red-50 border-l-4 text-red-700 px-4 py-3 rounded mb-6" style={{ borderColor: '#1a535c' }}>
               <p className="text-sm">{error}</p>
             </div>
           )}
@@ -64,7 +64,8 @@ function Login({ setToken }) {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition text-gray-900 placeholder-gray-400"
+                style={{ '--tw-ring-color': '#1a535c' }}
                 placeholder="name@company.com"
                 required
               />
@@ -76,7 +77,8 @@ function Login({ setToken }) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition text-gray-900 placeholder-gray-400"
+                className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition text-gray-900 placeholder-gray-400"
+                style={{ '--tw-ring-color': '#1a535c' }}
                 placeholder="Enter your password"
                 required
               />
@@ -87,14 +89,15 @@ function Login({ setToken }) {
                 <input type="checkbox" className="mr-2 rounded" />
                 Remember me
               </label>
-              <a href="#" className="text-indigo-600 hover:text-indigo-700 font-medium">
+              <a href="#" className="font-medium hover:opacity-80" style={{ color: '#1a535c' }}>
                 Forgot password?
               </a>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition duration-200 shadow-lg hover:shadow-xl"
+              className="w-full text-white font-semibold py-3 rounded-xl hover:opacity-90 transition duration-200 shadow-lg hover:shadow-xl"
+              style={{ backgroundColor: '#1a535c' }}
             >
               Sign in
             </button>
@@ -103,7 +106,7 @@ function Login({ setToken }) {
           <div className="mt-6 text-center">
             <p className="text-gray-600">
               Don't have an account?{' '}
-              <Link to="/signup" className="text-indigo-600 hover:text-indigo-700 font-semibold">
+              <Link to="/signup" className="font-semibold hover:opacity-80" style={{ color: '#1a535c' }}>
                 Sign up for free
               </Link>
             </p>
@@ -112,24 +115,24 @@ function Login({ setToken }) {
       </div>
 
       {/* Right Side - Image/Illustration */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-indigo-600 to-purple-700 items-center justify-center p-12">
+      <div className="hidden lg:flex flex-1 items-center justify-center p-12" style={{ backgroundColor: '#1a535c' }}>
         <div className="max-w-md text-white">
           <h2 className="text-4xl font-bold mb-6">Start your journey with us</h2>
-          <p className="text-indigo-100 text-lg mb-8">
+          <p className="text-red-100 text-lg mb-8">
             Discover the world's best platform for managing your projects and collaborating with your team.
           </p>
           <div className="space-y-4">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">✓</div>
-              <span className="text-indigo-100">Secure authentication</span>
+              <span className="text-red-100">Secure authentication</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">✓</div>
-              <span className="text-indigo-100">Easy to use interface</span>
+              <span className="text-red-100">Easy to use interface</span>
             </div>
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">✓</div>
-              <span className="text-indigo-100">24/7 customer support</span>
+              <span className="text-red-100">24/7 customer support</span>
             </div>
           </div>
         </div>

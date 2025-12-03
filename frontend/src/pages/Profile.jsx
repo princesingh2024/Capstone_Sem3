@@ -77,16 +77,16 @@ function Profile() {
     <div className="max-w-4xl mx-auto px-6 py-8">
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-8 py-12 text-white">
+        <div className="px-8 py-12 text-white" style={{ backgroundColor: '#1a535c' }}>
           <div className="flex items-center space-x-6">
             <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center text-4xl font-bold">
               {user.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
             <div>
               <h1 className="text-3xl font-bold">{user.name || 'User'}</h1>
-              <p className="text-indigo-100">{user.email}</p>
+              <p className="text-red-100">{user.email}</p>
               {user.location && (
-                <p className="text-indigo-100 flex items-center mt-1">
+                <p className="text-red-100 flex items-center mt-1">
                   📍 {user.location}
                 </p>
               )}
@@ -142,7 +142,8 @@ function Profile() {
 
                 <button
                   onClick={() => setEditing(true)}
-                  className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
+                  className="text-white px-6 py-2 rounded-lg hover:opacity-90 transition"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Edit Profile
                 </button>
@@ -220,7 +221,8 @@ function Profile() {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-indigo-600 text-white font-semibold py-3 rounded-xl hover:bg-indigo-700 transition"
+                  className="flex-1 text-white font-semibold py-3 rounded-xl hover:opacity-90 transition"
+                  style={{ backgroundColor: '#1a535c' }}
                 >
                   Save Changes
                 </button>

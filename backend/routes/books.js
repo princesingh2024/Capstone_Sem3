@@ -46,7 +46,7 @@ router.get('/', authenticateToken, async (req, res) => {
         ]
       }),
       ...(status && { status }),
-      ...(genre && { genre: { contains: genre, mode: 'insensitive' } })
+      ...(genre && { genre: { has: genre } })
     };
 
     // Build orderBy clause
@@ -104,7 +104,21 @@ router.get('/:id', authenticateToken, async (req, res) => {
 // Add new book
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { title, author, genre, pages, status = 'TO_READ' } = req.body;
+    const { 
+      title, 
+      author, 
+      genre, 
+      pages, 
+      status = 'TO_READ',
+      isbn,
+      publisher,
+      publishedYear,
+      language = 'English',
+      description,
+      coverImage,
+      format = 'PHYSICAL',
+      priority = 'MEDIUM'
+    } = req.body;
 
     if (!title || !author) {
       return res.status(400).json({ error: 'Title and author are required' });
@@ -114,10 +128,18 @@ router.post('/', authenticateToken, async (req, res) => {
       data: {
         title,
         author,
-        genre,
+        genre: genre || [],
         pages: pages ? parseInt(pages) : null,
         status,
         userId: req.userId,
+        isbn: isbn || null,
+        publisher: publisher || null,
+        publishedYear: publishedYear ? parseInt(publishedYear) : null,
+        language,
+        description: description || null,
+        coverImage: coverImage || null,
+        format,
+        priority,
         ...(status === 'IN_PROGRESS' && { dateStarted: new Date() }),
         ...(status === 'COMPLETED' && { 
           dateStarted: new Date(), 
@@ -137,7 +159,7 @@ router.post('/', authenticateToken, async (req, res) => {
 // Update book
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    const { title, author, genre, pages, status, currentPage, notes, review, rating } = req.body;
+    const { title, author, genre, pages, status, currentPage, notes, review, rating, isbn, publisher, publishedYear, language, description, coverImage, format, priority } = req.body;
 
     const existingBook = await prisma.book.findFirst({
       where: {
@@ -150,18 +172,27 @@ router.put('/:id', authenticateToken, async (req, res) => {
       return res.status(404).json({ error: 'Book not found' });
     }
 
-    // Handle status changes
-    const updateData = {
-      ...(title && { title }),
-      ...(author && { author }),
-      ...(genre !== undefined && { genre }),
-      ...(pages && { pages: parseInt(pages) }),
-      ...(status && { status }),
-      ...(currentPage !== undefined && { currentPage: parseInt(currentPage) }),
-      ...(notes !== undefined && { notes }),
-      ...(review !== undefined && { review }),
-      ...(rating && { rating: parseInt(rating) })
-    };
+    // Build update data object
+    const updateData = {};
+    
+    // Only update fields that are provided
+    if (title !== undefined) updateData.title = title;
+    if (author !== undefined) updateData.author = author;
+    if (genre !== undefined) updateData.genre = genre;
+    if (pages !== undefined) updateData.pages = pages ? parseInt(pages) : null;
+    if (status !== undefined) updateData.status = status;
+    if (currentPage !== undefined) updateData.currentPage = parseInt(currentPage) || 0;
+    if (notes !== undefined) updateData.notes = notes;
+    if (review !== undefined) updateData.review = review;
+    if (rating !== undefined) updateData.rating = rating ? parseInt(rating) : null;
+    if (isbn !== undefined) updateData.isbn = isbn;
+    if (publisher !== undefined) updateData.publisher = publisher;
+    if (publishedYear !== undefined) updateData.publishedYear = publishedYear ? parseInt(publishedYear) : null;
+    if (language !== undefined) updateData.language = language;
+    if (description !== undefined) updateData.description = description;
+    if (coverImage !== undefined) updateData.coverImage = coverImage;
+    if (format !== undefined) updateData.format = format;
+    if (priority !== undefined) updateData.priority = priority;
 
     // Handle status-specific updates
     if (status && status !== existingBook.status) {
@@ -172,9 +203,17 @@ router.put('/:id', authenticateToken, async (req, res) => {
         if (!existingBook.dateStarted) {
           updateData.dateStarted = new Date();
         }
-        if (pages) {
-          updateData.currentPage = parseInt(pages);
+        // If marking as completed and pages are provided, set current page to total pages
+        if (updateData.pages) {
+          updateData.currentPage = updateData.pages;
+        } else if (existingBook.pages) {
+          updateData.currentPage = existingBook.pages;
         }
+      } else if (status === 'TO_READ') {
+        // Reset progress when moving back to "to read"
+        updateData.currentPage = 0;
+        updateData.dateStarted = null;
+        updateData.dateFinished = null;
       }
     }
 

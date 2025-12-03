@@ -11,6 +11,7 @@ import ReadingSessions from './pages/ReadingSessions';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import BookDetails from './pages/BookDetails';
+import SearchBooks from './pages/SearchBooks';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
 
   const ProtectedRoute = ({ children }) => {
     return token ? (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      <div className="min-h-screen bg-white">
         <Navbar />
         {children}
       </div>
@@ -56,6 +57,12 @@ function App() {
         <Route path="/add-book" element={
           <ProtectedRoute>
             <AddBook />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/search-books" element={
+          <ProtectedRoute>
+            <SearchBooks />
           </ProtectedRoute>
         } />
         
