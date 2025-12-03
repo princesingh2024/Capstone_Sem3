@@ -65,17 +65,44 @@ function BookSearch({ onBookSelect }) {
   };
 
   const handleAddBook = (book) => {
+    // Convert language code to full name
+    const getLanguageName = (langCode) => {
+      const languageMap = {
+        'en': 'English',
+        'es': 'Spanish',
+        'fr': 'French',
+        'de': 'German',
+        'it': 'Italian',
+        'pt': 'Portuguese',
+        'ru': 'Russian',
+        'ja': 'Japanese',
+        'ko': 'Korean',
+        'zh': 'Chinese'
+      };
+      return languageMap[langCode] || 'English';
+    };
+
+    // Clean and validate genre data
+    const cleanGenres = (categories) => {
+      if (!categories || !Array.isArray(categories)) return [];
+      return categories
+        .filter(cat => cat && typeof cat === 'string')
+        .map(cat => cat.trim())
+        .filter(cat => cat.length > 0)
+        .slice(0, 5); // Limit to 5 genres max
+    };
+
     const bookData = {
       title: book.volumeInfo?.title || 'Unknown Title',
       author: formatAuthors(book.volumeInfo?.authors),
-      genre: book.volumeInfo?.categories || [],
+      genre: cleanGenres(book.volumeInfo?.categories),
       description: book.volumeInfo?.description || '',
       isbn: book.volumeInfo?.industryIdentifiers?.[0]?.identifier || '',
       publisher: book.volumeInfo?.publisher || '',
       publishedYear: book.volumeInfo?.publishedDate ? new Date(book.volumeInfo.publishedDate).getFullYear() : null,
       pages: book.volumeInfo?.pageCount || null,
       coverImage: getBookCover(book),
-      language: book.volumeInfo?.language || 'en'
+      language: getLanguageName(book.volumeInfo?.language || 'en')
     };
 
     if (onBookSelect) {

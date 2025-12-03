@@ -120,39 +120,78 @@ router.post('/', authenticateToken, async (req, res) => {
       priority = 'MEDIUM'
     } = req.body;
 
+    console.log('Received book data:', req.body);
+
+    // Validate required fields
     if (!title || !author) {
       return res.status(400).json({ error: 'Title and author are required' });
     }
 
+    // Validate enum values
+    const validStatuses = ['TO_READ', 'IN_PROGRESS', 'COMPLETED', 'DNF', 'ON_HOLD'];
+    const validFormats = ['PHYSICAL', 'EBOOK', 'AUDIOBOOK', 'PDF'];
+    const validPriorities = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ error: `Invalid status. Must be one of: ${validStatuses.join(', ')}` });
+    }
+
+    if (!validFormats.includes(format)) {
+      return res.status(400).json({ error: `Invalid format. Must be one of: ${validFormats.join(', ')}` });
+    }
+
+    if (!validPriorities.includes(priority)) {
+      return res.status(400).json({ error: `Invalid priority. Must be one of: ${validPriorities.join(', ')}` });
+    }
+
+    // Prepare data for database
+    const bookData = {
+      title: title.trim(),
+      author: author.trim(),
+      genre: Array.isArray(genre) ? genre : [],
+      pages: pages ? parseInt(pages) : null,
+      status,
+      userId: req.userId,
+      isbn: isbn || null,
+      publisher: publisher || null,
+      publishedYear: publishedYear ? parseInt(publishedYear) : null,
+      language: language || 'English',
+      description: description || null,
+      coverImage: coverImage || null,
+      format,
+      priority,
+      ...(status === 'IN_PROGRESS' && { dateStarted: new Date() }),
+      ...(status === 'COMPLETED' && { 
+        dateStarted: new Date(), 
+        dateFinished: new Date(),
+        currentPage: pages ? parseInt(pages) : 0
+      })
+    };
+
+    console.log('Creating book with data:', bookData);
+
     const book = await prisma.book.create({
-      data: {
-        title,
-        author,
-        genre: genre || [],
-        pages: pages ? parseInt(pages) : null,
-        status,
-        userId: req.userId,
-        isbn: isbn || null,
-        publisher: publisher || null,
-        publishedYear: publishedYear ? parseInt(publishedYear) : null,
-        language,
-        description: description || null,
-        coverImage: coverImage || null,
-        format,
-        priority,
-        ...(status === 'IN_PROGRESS' && { dateStarted: new Date() }),
-        ...(status === 'COMPLETED' && { 
-          dateStarted: new Date(), 
-          dateFinished: new Date(),
-          currentPage: pages ? parseInt(pages) : 0
-        })
-      }
+      data: bookData
     });
 
+    console.log('Book created successfully:', book.id);
     res.status(201).json(book);
   } catch (error) {
     console.error('Error creating book:', error);
-    res.status(500).json({ error: 'Failed to create book' });
+    
+    // Provide more specific error messages
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'A book with this information already exists' });
+    }
+    
+    if (error.code === 'P2003') {
+      return res.status(400).json({ error: 'Invalid reference data provided' });
+    }
+
+    res.status(500).json({ 
+      error: 'Failed to create book',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 

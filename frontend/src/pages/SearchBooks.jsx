@@ -13,18 +13,33 @@ function SearchBooks() {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // Clean and validate the book data
+      const cleanBookData = {
+        title: bookData.title || 'Unknown Title',
+        author: bookData.author || 'Unknown Author',
+        genre: Array.isArray(bookData.genre) ? bookData.genre : [],
+        description: bookData.description || '',
+        isbn: bookData.isbn || '',
+        publisher: bookData.publisher || '',
+        publishedYear: bookData.publishedYear || null,
+        pages: bookData.pages || null,
+        coverImage: bookData.coverImage || '',
+        language: bookData.language || 'English',
+        status: 'TO_READ',
+        format: 'PHYSICAL',
+        priority: 'MEDIUM'
+      };
+
+      console.log('Sending book data:', cleanBookData);
+
       const response = await fetch(`${API_URL}/api/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          ...bookData,
-          status: 'TO_READ',
-          format: 'PHYSICAL',
-          priority: 'MEDIUM'
-        })
+        body: JSON.stringify(cleanBookData)
       });
 
       if (response.ok) {
@@ -41,7 +56,11 @@ function SearchBooks() {
         }, 3000);
       } else {
         const data = await response.json();
-        console.error('Failed to add book:', data);
+        console.error('Failed to add book:', {
+          status: response.status,
+          statusText: response.statusText,
+          error: data
+        });
         
         // If token is invalid, redirect to login
         if (response.status === 401 || response.status === 403) {
@@ -51,7 +70,7 @@ function SearchBooks() {
           return;
         }
         
-        alert(data.error || 'Failed to add book');
+        alert(`Failed to add book: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error adding book:', error);
