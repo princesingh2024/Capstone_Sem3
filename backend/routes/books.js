@@ -14,12 +14,46 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET environment variable is not set');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
+    if (err) {
+      console.error('JWT verification error:', err.message);
+      return res.status(403).json({ error: 'Invalid token' });
+    }
+    console.log('Decoded token payload:', user);
     req.userId = user.userId;
     next();
   });
 };
+
+// Test authentication endpoint (must be before parameterized routes)
+router.get('/test-auth', authenticateToken, async (req, res) => {
+  try {
+    console.log('Testing auth for user ID:', req.userId);
+    
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+      select: { id: true, email: true, name: true }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found in database' });
+    }
+
+    res.json({ 
+      message: 'Authentication successful',
+      userId: req.userId,
+      user: user
+    });
+  } catch (error) {
+    console.error('Auth test error:', error);
+    res.status(500).json({ error: 'Auth test failed' });
+  }
+});
 
 // Get all books with search, filter, sort, and pagination
 router.get('/', authenticateToken, async (req, res) => {
@@ -121,11 +155,28 @@ router.post('/', authenticateToken, async (req, res) => {
     } = req.body;
 
     console.log('Received book data:', req.body);
+    console.log('User ID from token:', req.userId);
 
     // Validate required fields
     if (!title || !author) {
       return res.status(400).json({ error: 'Title and author are required' });
     }
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId }
+    });
+
+    if (!user) {
+      console.error('User not found for ID:', req.userId);
+      console.error('This usually means the JWT token contains a user ID that no longer exists in the database');
+      return res.status(401).json({ 
+        error: 'User session invalid. Please log in again.',
+        code: 'USER_NOT_FOUND'
+      });
+    }
+
+    console.log('User found:', user.email);
 
     // Validate enum values
     const validStatuses = ['TO_READ', 'IN_PROGRESS', 'COMPLETED', 'DNF', 'ON_HOLD'];

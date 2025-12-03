@@ -51,10 +51,10 @@ function AddBook() {
         const data = await response.json();
         console.error('Failed to add book:', data);
         
-        // If token is invalid, redirect to login
-        if (response.status === 401 || response.status === 403) {
+        // If token is invalid or user not found, redirect to login
+        if (response.status === 401 || response.status === 403 || data.code === 'USER_NOT_FOUND') {
           localStorage.removeItem('token');
-          setError('Your session has expired. Please log in again.');
+          setError('Your session has expired or is invalid. Please log in again.');
           setTimeout(() => navigate('/login'), 2000);
           return;
         }

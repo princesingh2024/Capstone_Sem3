@@ -33,6 +33,27 @@ function SearchBooks() {
 
       console.log('Sending book data:', cleanBookData);
 
+      // Test authentication first
+      const authTestResponse = await fetch(`${API_URL}/api/books/test-auth`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      if (!authTestResponse.ok) {
+        const authError = await authTestResponse.json();
+        console.error('Auth test failed:', authError);
+        alert(`Authentication failed: ${authError.error}`);
+        if (authTestResponse.status === 401 || authTestResponse.status === 403) {
+          localStorage.removeItem('token');
+          navigate('/login');
+        }
+        return;
+      }
+
+      const authData = await authTestResponse.json();
+      console.log('Auth test successful:', authData);
+
       const response = await fetch(`${API_URL}/api/books`, {
         method: 'POST',
         headers: {
@@ -62,10 +83,10 @@ function SearchBooks() {
           error: data
         });
         
-        // If token is invalid, redirect to login
-        if (response.status === 401 || response.status === 403) {
+        // If token is invalid or user not found, redirect to login
+        if (response.status === 401 || response.status === 403 || data.code === 'USER_NOT_FOUND') {
           localStorage.removeItem('token');
-          alert('Your session has expired. Please log in again.');
+          alert('Your session has expired or is invalid. Please log in again.');
           navigate('/login');
           return;
         }
