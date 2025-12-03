@@ -49,6 +49,16 @@ function AddBook() {
         navigate('/library');
       } else {
         const data = await response.json();
+        console.error('Failed to add book:', data);
+        
+        // If token is invalid, redirect to login
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('token');
+          setError('Your session has expired. Please log in again.');
+          setTimeout(() => navigate('/login'), 2000);
+          return;
+        }
+        
         setError(data.error || 'Failed to add book');
       }
     } catch (err) {

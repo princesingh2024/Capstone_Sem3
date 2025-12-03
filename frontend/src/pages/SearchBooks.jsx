@@ -41,6 +41,16 @@ function SearchBooks() {
         }, 3000);
       } else {
         const data = await response.json();
+        console.error('Failed to add book:', data);
+        
+        // If token is invalid, redirect to login
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('token');
+          alert('Your session has expired. Please log in again.');
+          navigate('/login');
+          return;
+        }
+        
         alert(data.error || 'Failed to add book');
       }
     } catch (error) {

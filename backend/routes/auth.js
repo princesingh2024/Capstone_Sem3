@@ -15,8 +15,16 @@ const authenticateToken = (req, res, next) => {
     return res.status(401).json({ error: 'Access token required' });
   }
 
+  if (!process.env.JWT_SECRET) {
+    console.error('JWT_SECRET environment variable is not set');
+    return res.status(500).json({ error: 'Server configuration error' });
+  }
+
   jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.status(403).json({ error: 'Invalid token' });
+    if (err) {
+      console.error('JWT verification error:', err.message);
+      return res.status(403).json({ error: 'Invalid token' });
+    }
     req.userId = user.userId;
     next();
   });
