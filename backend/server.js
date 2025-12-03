@@ -16,62 +16,23 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Ultra-permissive CORS for production deployment issues
-// This will allow all origins in production to fix deployment issues
+// Simple CORS configuration
 const corsOptions = {
-  origin: true, // Allow all origins in production
+  origin: ['https://captoneproject-one.vercel.app', 'http://localhost:3000'],
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
-  maxAge: 86400
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 };
 
-// Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Parse JSON bodies
 app.use(express.json({ limit: '10mb' }));
 
-// Debug request logger
+// Simple request logger
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.headers.origin || 'none'}`);
+  console.log(`${req.method} ${req.path}`);
   next();
-});
-
-// Force CORS headers on ALL responses
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  
-  // Set CORS headers aggressively
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-  
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  
-  console.log(`🔧 CORS headers set for ${req.method} ${req.path} from origin: ${origin || 'none'}`);
-  
-  next();
-});
-
-// Handle ALL OPTIONS requests aggressively
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  
-  // Always allow the requesting origin
-  res.header('Access-Control-Allow-Origin', origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
-  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  
-  console.log(`✅ OPTIONS preflight handled for: ${origin || 'no-origin'}`);
-  res.status(204).end();
 });
 
 // Routes
