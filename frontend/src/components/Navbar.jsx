@@ -1,14 +1,18 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
-function Navbar() {
+function Navbar({ setToken }) {
   const location = useLocation();
   const navigate = useNavigate();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    setToken(null);
+    setShowProfileMenu(false);
     navigate('/login');
+    // Force page refresh to clear any cached state
+    window.location.reload();
   };
 
   const isActive = (path) => location.pathname === path;

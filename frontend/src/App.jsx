@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import Login from './pages/Login';
-import Signup from './pages/Signup';
+import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
 import Library from './pages/Library';
 import AddBook from './pages/AddBook';
@@ -29,7 +28,7 @@ function App() {
   const ProtectedRoute = ({ children }) => {
     return token ? (
       <div className="min-h-screen bg-white">
-        <Navbar />
+        <Navbar setToken={setToken} />
         {children}
       </div>
     ) : (
@@ -40,8 +39,8 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={!token ? <Login setToken={setToken} /> : <Navigate to="/library" />} />
-        <Route path="/signup" element={!token ? <Signup setToken={setToken} /> : <Navigate to="/library" />} />
+        <Route path="/login" element={!token ? <Auth setToken={setToken} /> : <Navigate to="/library" />} />
+        <Route path="/signup" element={!token ? <Auth setToken={setToken} /> : <Navigate to="/library" />} />
         
         <Route path="/dashboard" element={
           <ProtectedRoute>
@@ -110,6 +109,7 @@ function App() {
         } />
         
         <Route path="/" element={<Navigate to={token ? "/library" : "/login"} />} />
+        <Route path="/auth" element={!token ? <Auth setToken={setToken} /> : <Navigate to="/library" />} />
       </Routes>
     </BrowserRouter>
   );
