@@ -58,6 +58,17 @@ function Navbar() {
               Sessions
             </Link>
             <Link
+              to="/ai-insights"
+              className={`font-medium transition-colors ${
+                isActive('/ai-insights')
+                  ? 'border-b-2 pb-1'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              style={isActive('/ai-insights') ? { color: '#1a535c', borderColor: '#1a535c' } : {}}
+            >
+              AI Assistant
+            </Link>
+            <Link
               to="/analytics"
               className={`font-medium transition-colors ${
                 isActive('/analytics')

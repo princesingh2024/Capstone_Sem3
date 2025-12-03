@@ -8,6 +8,8 @@ function BookDetails() {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
+  const [aiSummary, setAiSummary] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
 
   useEffect(() => {
     fetchBook();
@@ -31,6 +33,25 @@ function BookDetails() {
       navigate('/library');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAISummary = async () => {
+    setSummaryLoading(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/api/ai/summary/${id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiSummary(data.summary);
+      }
+    } catch (error) {
+      console.error('Error fetching AI summary:', error);
+    } finally {
+      setSummaryLoading(false);
     }
   };
 
@@ -208,17 +229,17 @@ function BookDetails() {
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
         <div className="border-b border-gray-200">
           <nav className="flex space-x-8 px-8">
-            {['overview', 'notes', 'sessions'].map((tab) => (
+            {['overview', 'ai-summary', 'notes', 'sessions'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm capitalize ${
+                className={`py-4 px-2 border-b-2 font-medium text-sm ${
                   activeTab === tab
                     ? 'border-indigo-500 text-indigo-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                {tab}
+                {tab === 'ai-summary' ? 'AI Summary' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </nav>
@@ -254,6 +275,90 @@ function BookDetails() {
                   {book.location && <p><span className="font-medium">Location:</span> {book.location}</p>}
                 </div>
               </div>
+            </div>
+          )}
+
+          {activeTab === 'ai-summary' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-900">AI-Generated Book Summary</h3>
+                <button
+                  onClick={fetchAISummary}
+                  disabled={summaryLoading}
+                  className="text-white font-medium px-4 py-2 rounded-lg hover:opacity-90 transition disabled:opacity-50"
+                  style={{ backgroundColor: '#1a535c' }}
+                >
+                  {summaryLoading ? 'Generating...' : aiSummary ? 'Refresh' : 'Generate Summary'}
+                </button>
+              </div>
+
+              {summaryLoading ? (
+                <div className="text-center py-12">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: '#1a535c' }}></div>
+                  <p className="mt-4 text-gray-600">AI is analyzing the book...</p>
+                </div>
+              ) : aiSummary ? (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 p-6 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">📖 Overview</h4>
+                    <p className="text-gray-700">{aiSummary.overview}</p>
+                  </div>
+
+                  <div className="bg-green-50 p-6 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">🎯 Key Themes</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {aiSummary.keyThemes?.map((theme, index) => (
+                        <span key={index} className="px-3 py-1 bg-green-200 text-green-800 rounded-full text-sm">
+                          {theme}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-purple-50 p-6 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">💡 Main Takeaways</h4>
+                    <ul className="space-y-2">
+                      {aiSummary.mainTakeaways?.map((takeaway, index) => (
+                        <li key={index} className="flex items-start space-x-2">
+                          <span className="text-purple-600 mt-1">•</span>
+                          <span className="text-gray-700">{takeaway}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="bg-orange-50 p-6 rounded-lg">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-3">👥 Recommended For</h4>
+                    <p className="text-gray-700">{aiSummary.recommendedFor}</p>
+                  </div>
+
+                  {aiSummary.similarBooks && aiSummary.similarBooks.length > 0 && (
+                    <div className="bg-gray-50 p-6 rounded-lg">
+                      <h4 className="text-lg font-semibold text-gray-900 mb-3">📚 Similar Books</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {aiSummary.similarBooks.map((book, index) => (
+                          <span key={index} className="px-3 py-1 bg-gray-200 text-gray-800 rounded-md text-sm">
+                            {book}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">🤖</div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">AI Book Summary</h3>
+                  <p className="text-gray-600 mb-6">Get AI-powered insights about this book including key themes, takeaways, and recommendations.</p>
+                  <button
+                    onClick={fetchAISummary}
+                    className="text-white font-medium px-6 py-3 rounded-lg hover:opacity-90 transition"
+                    style={{ backgroundColor: '#1a535c' }}
+                  >
+                    Generate AI Summary
+                  </button>
+                </div>
+              )}
             </div>
           )}
 

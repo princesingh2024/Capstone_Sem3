@@ -12,6 +12,7 @@ import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import BookDetails from './pages/BookDetails';
 import SearchBooks from './pages/SearchBooks';
+import AIInsights from './pages/AIInsights';
 import Navbar from './components/Navbar';
 
 function App() {
@@ -87,6 +88,12 @@ function App() {
         <Route path="/reading-sessions" element={
           <ProtectedRoute>
             <ReadingSessions />
+          </ProtectedRoute>
+        } />
+        
+        <Route path="/ai-insights" element={
+          <ProtectedRoute>
+            <AIInsights />
           </ProtectedRoute>
         } />
         

@@ -1,0 +1,200 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+class GeminiService {
+  constructor() {
+    if (!process.env.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY environment variable is required');
+    }
+    
+    this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: 'gemini-pro' });
+  }
+
+  async generateBookRecommendations(userBooks, preferences = {}) {
+    try {
+      const { genres = [], authors = [], readingGoals = '' } = preferences;
+      
+      const booksContext = userBooks.map(book => 
+        `"${book.title}" by ${book.author} (${book.genre?.join(', ') || 'Unknown genre'}) - Status: ${book.status}`
+      ).join('\n');
+
+      const prompt = `
+Based on this user's reading history and preferences, recommend 5 books they might enjoy:
+
+READING HISTORY:
+${booksContext}
+
+PREFERENCES:
+- Favorite genres: ${genres.join(', ') || 'Not specified'}
+- Favorite authors: ${authors.join(', ') || 'Not specified'}
+- Reading goals: ${readingGoals || 'Not specified'}
+
+Please provide 5 book recommendations in this exact JSON format:
+{
+  "recommendations": [
+    {
+      "title": "Book Title",
+      "author": "Author Name",
+      "genre": ["Genre1", "Genre2"],
+      "reason": "Why this book is recommended based on their reading history",
+      "description": "Brief description of the book"
+    }
+  ]
+}
+
+Focus on books that match their reading patterns and introduce them to new but related genres or authors.
+`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      // Try to parse JSON from the response
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      throw new Error('Could not parse recommendations from AI response');
+    } catch (error) {
+      console.error('Error generating book recommendations:', error);
+      throw new Error('Failed to generate book recommendations');
+    }
+  }
+
+  async generateReadingInsights(userBooks, readingSessions = []) {
+    try {
+      const completedBooks = userBooks.filter(book => book.status === 'COMPLETED');
+      const inProgressBooks = userBooks.filter(book => book.status === 'IN_PROGRESS');
+      
+      const booksContext = completedBooks.map(book => 
+        `"${book.title}" by ${book.author} (${book.genre?.join(', ') || 'Unknown'}) - Rating: ${book.rating || 'Not rated'}`
+      ).join('\n');
+
+      const prompt = `
+Analyze this user's reading patterns and provide insights:
+
+COMPLETED BOOKS (${completedBooks.length}):
+${booksContext}
+
+CURRENTLY READING (${inProgressBooks.length}):
+${inProgressBooks.map(book => `"${book.title}" by ${book.author}`).join('\n')}
+
+READING SESSIONS: ${readingSessions.length} sessions recorded
+
+Please provide reading insights in this JSON format:
+{
+  "insights": {
+    "readingPatterns": "Analysis of their reading habits and preferences",
+    "favoriteGenres": ["Genre1", "Genre2"],
+    "readingStrengths": "What they're doing well in their reading journey",
+    "suggestions": "Suggestions to improve their reading experience",
+    "yearProgress": "Assessment of their reading progress this year"
+  }
+}
+
+Be encouraging and provide actionable insights based on their reading data.
+`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      throw new Error('Could not parse insights from AI response');
+    } catch (error) {
+      console.error('Error generating reading insights:', error);
+      throw new Error('Failed to generate reading insights');
+    }
+  }
+
+  async generateBookSummary(bookTitle, bookAuthor, userNotes = '') {
+    try {
+      const prompt = `
+Create a helpful summary for the book "${bookTitle}" by ${bookAuthor}.
+
+${userNotes ? `User's personal notes: ${userNotes}` : ''}
+
+Please provide a summary in this JSON format:
+{
+  "summary": {
+    "overview": "Brief overview of the book (2-3 sentences)",
+    "keyThemes": ["Theme1", "Theme2", "Theme3"],
+    "mainTakeaways": ["Takeaway1", "Takeaway2", "Takeaway3"],
+    "recommendedFor": "Who would enjoy this book",
+    "similarBooks": ["Similar Book 1", "Similar Book 2"]
+  }
+}
+
+Keep it concise and helpful for someone who has read or is reading the book.
+`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      throw new Error('Could not parse summary from AI response');
+    } catch (error) {
+      console.error('Error generating book summary:', error);
+      throw new Error('Failed to generate book summary');
+    }
+  }
+
+  async generateReadingGoals(userBooks, currentGoal = null) {
+    try {
+      const completedThisYear = userBooks.filter(book => 
+        book.status === 'COMPLETED' && 
+        book.dateFinished && 
+        new Date(book.dateFinished).getFullYear() === new Date().getFullYear()
+      );
+
+      const prompt = `
+Help set realistic reading goals for this user:
+
+CURRENT PROGRESS:
+- Books completed this year: ${completedThisYear.length}
+- Current goal: ${currentGoal || 'Not set'}
+- Total books in library: ${userBooks.length}
+- Currently reading: ${userBooks.filter(book => book.status === 'IN_PROGRESS').length}
+
+Please suggest reading goals in this JSON format:
+{
+  "goals": {
+    "yearlyGoal": "Suggested number of books for the year",
+    "monthlyGoal": "Suggested books per month",
+    "genreChallenge": "Suggestion to explore new genres",
+    "readingHabit": "Suggestion for building better reading habits",
+    "motivation": "Encouraging message about their reading journey"
+  }
+}
+
+Be realistic and encouraging based on their current reading pace.
+`;
+
+      const result = await this.model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        return JSON.parse(jsonMatch[0]);
+      }
+      
+      throw new Error('Could not parse goals from AI response');
+    } catch (error) {
+      console.error('Error generating reading goals:', error);
+      throw new Error('Failed to generate reading goals');
+    }
+  }
+}
+
+export default new GeminiService();

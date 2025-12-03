@@ -7,6 +7,7 @@ import bookRoutes from './routes/books.js';
 import analyticsRoutes from './routes/analytics.js';
 import readingSessionRoutes from './routes/readingSessions.js';
 import collectionRoutes from './routes/collections.js';
+import aiRoutes from './routes/ai.js';
 
 dotenv.config();
 
@@ -72,6 +73,7 @@ app.use('/api/books', bookRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reading-sessions', readingSessionRoutes);
 app.use('/api/collections', collectionRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -92,13 +94,13 @@ const server = app.listen(PORT, async () => {
   console.log(`🗄️ DATABASE_URL configured:`, !!process.env.DATABASE_URL);
   console.log(`🌍 NODE_ENV:`, process.env.NODE_ENV);
   
-  // Test database connection
+  // Test database connection (don't exit on failure for now)
   try {
     await prisma.$connect();
     console.log('✅ Database connected successfully');
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
-    process.exit(1);
+    console.log('⚠️ Server will continue without database connection');
   }
 });
 
