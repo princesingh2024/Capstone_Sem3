@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 import authRoutes from './routes/auth.js';
 import bookRoutes from './routes/books.js';
 import analyticsRoutes from './routes/analytics.js';
@@ -8,6 +9,9 @@ import readingSessionRoutes from './routes/readingSessions.js';
 import collectionRoutes from './routes/collections.js';
 
 dotenv.config();
+
+// Initialize Prisma Client
+const prisma = new PrismaClient();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -43,9 +47,18 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', message: 'ReadingHub API is running' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 ReadingHub Server running on port ${PORT}`);
   console.log(`📚 API Health: http://localhost:${PORT}/health`);
   console.log(`🌐 CORS enabled for origins:`, corsOptions.origin);
   console.log(`🔑 JWT_SECRET configured:`, !!process.env.JWT_SECRET);
+  console.log(`🗄️ DATABASE_URL configured:`, !!process.env.DATABASE_URL);
+  
+  // Test database connection
+  try {
+    await prisma.$connect();
+    console.log('✅ Database connected successfully');
+  } catch (error) {
+    console.error('❌ Database connection failed:', error.message);
+  }
 });
