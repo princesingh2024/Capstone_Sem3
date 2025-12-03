@@ -50,6 +50,9 @@ model Book {
   purchaseDate    DateTime?
   location        String?          // Where the book is stored
   condition       BookCondition?
+  notes           String?          // Personal notes about the book
+  review          String?          // Personal review of the book
+  rating          Int?             // Personal rating 1-5 stars
   dateAdded       DateTime         @default(now())
   dateStarted     DateTime?
   dateFinished    DateTime?
@@ -58,7 +61,7 @@ model Book {
   user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   readingSessions ReadingSession[]
   bookmarks       Bookmark[]
-  reviews         Review[]
+  reviews         Review[]         // Separate detailed reviews
   collections     BookCollection[]
   quotes          Quote[]
   createdAt       DateTime         @default(now())

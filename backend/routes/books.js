@@ -182,8 +182,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
     if (pages !== undefined) updateData.pages = pages ? parseInt(pages) : null;
     if (status !== undefined) updateData.status = status;
     if (currentPage !== undefined) updateData.currentPage = parseInt(currentPage) || 0;
-    if (notes !== undefined) updateData.notes = notes;
-    if (review !== undefined) updateData.review = review;
+    if (notes !== undefined) updateData.notes = notes || null;
+    if (review !== undefined) updateData.review = review || null;
     if (rating !== undefined) updateData.rating = rating ? parseInt(rating) : null;
     if (isbn !== undefined) updateData.isbn = isbn;
     if (publisher !== undefined) updateData.publisher = publisher;

@@ -28,13 +28,21 @@ function AddBook() {
 
     try {
       const token = localStorage.getItem('token');
+      
+      // Process the form data
+      const processedData = {
+        ...formData,
+        pages: formData.pages ? parseInt(formData.pages) : null,
+        publishedYear: formData.publishedYear ? parseInt(formData.publishedYear) : null
+      };
+
       const response = await fetch(`${API_URL}/api/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(processedData)
       });
 
       if (response.ok) {

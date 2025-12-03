@@ -304,6 +304,17 @@ function Library() {
                     </div>
                   )}
                   
+                  {book.rating && (
+                    <div className="flex items-center mb-2">
+                      {[...Array(5)].map((_, i) => (
+                        <span key={i} className={`text-lg ${i < book.rating ? 'text-yellow-400' : 'text-gray-300'}`}>
+                          ★
+                        </span>
+                      ))}
+                      <span className="text-sm text-gray-600 ml-2">({book.rating}/5)</span>
+                    </div>
+                  )}
+                  
                   {book.notes && (
                     <p className="text-sm text-gray-600 italic mb-3">{book.notes.substring(0, 100)}...</p>
                   )}
