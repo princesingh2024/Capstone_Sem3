@@ -19,13 +19,15 @@ In your Render backend service dashboard, set these environment variables:
 
 4. **PORT**: Render will set this automatically to 10000
 
-### Frontend (Render)
-In your Render frontend service dashboard, set this environment variable:
+### Frontend (Vercel)
+In your Vercel project dashboard, set this environment variable:
 
 1. **VITE_API_URL**: Your backend URL
    ```
    https://capstone-backend.onrender.com
    ```
+
+Note: The vercel.json file should automatically set this, but you can also set it manually in Vercel dashboard.
 
 ## Deployment Steps
 

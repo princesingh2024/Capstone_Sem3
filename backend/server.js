@@ -12,8 +12,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://capstone-sem3-j7sk.vercel.app',
+    'https://capstone-frontend.onrender.com'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -30,4 +46,6 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 ReadingHub Server running on port ${PORT}`);
   console.log(`📚 API Health: http://localhost:${PORT}/health`);
+  console.log(`🌐 CORS enabled for origins:`, corsOptions.origin);
+  console.log(`🔑 JWT_SECRET configured:`, !!process.env.JWT_SECRET);
 });
