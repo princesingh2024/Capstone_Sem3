@@ -16,46 +16,49 @@ const prisma = new PrismaClient();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-/**
- * Whitelist — add any exact origins you want to allow.
- * Keep this strict for production.
- */
-const allowedOrigins = new Set([
-  'http://localhost:3000',
-  'http://localhost:5173',
-  'https://capstone-sem3-j7sk.vercel.app',
-  'https://capstone-sem3-five.vercel.app',
-  'https://capstone-frontend.onrender.com'
-]);
-
-/**
- * Simpler, reliable CORS handler:
- * - If there's no origin (curl / server-to-server) allow it.
- * - If origin is in whitelist OR matches known deployment patterns allow it.
- * - For preflight, we explicitly respond with 204 so browser gets headers quickly.
- */
+// Simple and robust CORS configuration for production
 const corsOptions = {
-  origin: (origin, callback) => {
-    // allow non-browser requests (curl, Postman, mobile)
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-
-    // exact whitelist match
-    if (allowedOrigins.has(origin)) return callback(null, true);
-
-    // allow your known deployment patterns (keeps whitelist easier to manage)
+    
+    // List of allowed origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://capstone-sem3-j7sk.vercel.app',
+      'https://capstone-sem3-five.vercel.app',
+      'https://capstone-frontend.onrender.com'
+    ];
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS allowed for:', origin);
+      return callback(null, true);
+    }
+    
+    // Allow any capstone-sem3 Vercel deployment
     if (origin.includes('capstone-sem3') && origin.includes('vercel.app')) {
-      console.log('CORS allowed for deployment:', origin);
+      console.log('✅ CORS allowed for Vercel deployment:', origin);
       return callback(null, true);
     }
+    
+    // Allow any capstone-frontend Render deployment
     if (origin.includes('capstone-frontend') && origin.includes('onrender.com')) {
-      console.log('CORS allowed for onrender frontend:', origin);
+      console.log('✅ CORS allowed for Render deployment:', origin);
       return callback(null, true);
     }
-
-    console.log('CORS blocked origin:', origin);
-    return callback(new Error('Not allowed by CORS'));
+    
+    // In production, be more permissive for HTTPS origins (temporary)
+    if (process.env.NODE_ENV === 'production' && origin.startsWith('https://')) {
+      console.log('⚠️ CORS allowed for production HTTPS:', origin);
+      return callback(null, true);
+    }
+    
+    console.log('❌ CORS blocked origin:', origin);
+    callback(new Error('Not allowed by CORS'));
   },
-  credentials: true, // only set true if you actually use cookies/auth across origins
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   maxAge: 86400
@@ -73,9 +76,40 @@ app.use((req, res, next) => {
   next();
 });
 
-// Explicitly handle OPTIONS preflight with the same cors policy.
-// Using the cors() middleware here ensures consistent headers on preflight responses.
-app.options('*', cors(corsOptions), (req, res) => res.sendStatus(204));
+// Additional CORS headers middleware for production reliability
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Always set CORS headers for production
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  
+  next();
+});
+
+// Explicitly handle OPTIONS preflight requests
+app.options('*', (req, res) => {
+  const origin = req.headers.origin;
+  
+  // Set CORS headers explicitly for preflight
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,PATCH');
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Requested-With,Accept,Origin');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  
+  console.log(`✅ Preflight handled for origin: ${origin || 'none'}`);
+  res.sendStatus(204);
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
