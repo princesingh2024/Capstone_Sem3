@@ -108,7 +108,7 @@ function Navbar({ setToken }) {
                 className="w-10 h-10 rounded-full flex items-center justify-center text-white font-medium hover:opacity-90 transition"
                 style={{ backgroundColor: '#1a535c' }}
               >
-                U
+                PS
               </button>
 
               {showProfileMenu && (
